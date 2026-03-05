@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Search, Plus, Filter, Lock, CheckCircle, Globe } from 'lucide-react';
 import { User, Project, AccessRequest, ViewType } from '../App';
 import { Sidebar } from './Sidebar';
@@ -31,12 +31,6 @@ export function Dashboard({
   const [selectedYear, setSelectedYear] = useState<string>('All');
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Initialize with mock data on first load
-  useEffect(() => {
-    if (projects.length === 0) {
-      setProjects(mockProjects);
-    }
-  }, []);
 
   // Get pending requests for the current student
   const pendingRequests = accessRequests.filter(
