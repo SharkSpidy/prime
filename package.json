@@ -54,8 +54,6 @@
       },
       "scripts": {
           "dev": "vite",
-          "build": "vite build",
-          "server": "nodemon server.js",
-          "start": "node server.js"
+          "build": "vite build"
       }
   }
