@@ -9,3 +9,14 @@
 
   Run `npm run dev` to start the development server.
   
+Architecture Overview
+
+  React Frontend (Vite)          Express Backend             MongoDB Atlas
+─────────────────────    →     ──────────────────    →    ────────────────
+App.tsx / components           REST API (port 5000)        Collections:
+  - Auth state                   /api/auth                   users
+  - Projects state               /api/projects               projects
+  - AccessRequests state         /api/access-requests        accessRequests
+  - LandingContent state         /api/admin                  landingContent
+                                 /api/landing
+
