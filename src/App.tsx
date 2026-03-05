@@ -11,7 +11,7 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [landingContent, setLandingContent] = useState<LandingContent>(defaultLandingContent);
   const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);   // NEW: check session on mount
+  const [loading, setLoading] = useState(true);
 
   // ─── On mount: restore session ──────────────────────────────────────────────
   useEffect(() => {
@@ -28,7 +28,7 @@ function App() {
     // Always load landing content
     api.landing.get()
       .then((content: any) => setLandingContent(content))
-      .catch(() => {}); // fallback to default
+      .catch(() => {});
   }, []);
 
   const loadInitialData = async (user: User) => {
@@ -37,6 +37,7 @@ function App() {
         api.projects.getAll(),
         api.accessRequests.getAll(),
       ]);
+
       setProjects(projectsData as Project[]);
       setAccessRequests(requestsData as AccessRequest[]);
 
@@ -51,8 +52,7 @@ function App() {
 
   // ─── Auth handlers ───────────────────────────────────────────────────────────
   const handleLogin = async (credentials: { email: string; password: string; name?: string; role: string }) => {
-    // This is called from Login.tsx — see next section
-    const { user } = credentials as any; // Login passes back the user
+    const { user } = credentials as any;
     setCurrentUser(user);
     setShowLogin(false);
     await loadInitialData(user);
@@ -83,6 +83,7 @@ function App() {
   const handleApproveRequest = async (requestId: string) => {
     const updated = await api.accessRequests.approve(requestId) as AccessRequest;
     setAccessRequests(prev => prev.map(r => r.id === requestId ? updated : r));
+
     const request = accessRequests.find(r => r.id === requestId);
     if (request) {
       setProjects(prev => prev.map(p =>
@@ -113,8 +114,37 @@ function App() {
     setLandingContent(updated);
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  // ─── Loading screen ──────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
-  // ─── Rest of the render logic stays IDENTICAL ─────────────────────────────────
-  // ...
+  // ─── ADMIN VIEW ──────────────────────────────────────────────────────────────
+  if (currentUser?.role === 'admin') {
+    return (
+      <AdminDashboard
+        user={currentUser}
+        landingContent={landingContent}
+        onUpdateContent={handleUpdateLandingContent}
+        onLogout={handleLogout}
+        projects={projects}
+        users={allUsers}
+        onApproveProject={handleApproveProject}
+        onRejectProject={handleRejectProject}
+      />
+    );
+  }
+
+  // ─── Rest of your normal app render (students/faculty/landing/dashboard) ────
+  return (
+    <div>
+      {/* your existing UI */}
+    </div>
+  );
 }
+
+export default App;
