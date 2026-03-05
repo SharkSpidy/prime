@@ -20,3 +20,22 @@ App.tsx / components           REST API (port 5000)        Collections:
   - LandingContent state         /api/admin                  landingContent
                                  /api/landing
 
+prime-backend/
+├── .env
+├── server.js
+├── models/
+│   ├── User.js
+│   ├── Project.js
+│   ├── AccessRequest.js
+│   └── LandingContent.js
+├── routes/
+│   ├── auth.js
+│   ├── projects.js
+│   ├── accessRequests.js
+│   ├── admin.js
+│   └── landing.js
+├── middleware/
+│   ├── auth.js
+│   └── errorHandler.js
+└── scripts/
+    └── seedAdmin.js
