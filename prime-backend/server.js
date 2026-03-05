@@ -15,9 +15,12 @@ const app = express();
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN,
-  credentials: true,           // Required to send/receive cookies cross-origin
+  origin: process.env.NODE_ENV === 'production'
+    ? 'https://your-production-domain.com'
+    : process.env.CLIENT_ORIGIN,
+  credentials: true, // Required to send/receive cookies cross-origin
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -38,8 +41,11 @@ app.use(errorHandler);
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('MongoDB connected');
-    app.listen(process.env.PORT, () => {
-      console.log(`Server running on http://localhost:${process.env.PORT}`);
+
+    const PORT = process.env.PORT || 5000;
+
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
     });
   })
   .catch(err => {
