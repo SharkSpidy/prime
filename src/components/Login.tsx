@@ -14,18 +14,23 @@ export function Login({ onLogin, onBack }: LoginProps) {
   const [name, setName] = useState('');
   const [role, setRole] = useState<UserRole>('student');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const user: User = {
-      id: `user-${Date.now()}`,
-      email,
-      name: name || email.split('@')[0],
-      role,
-    };
-    
-    onLogin(user);
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    let result: any;
+
+    if (isSignup) {
+      result = await api.auth.signup({ name, email, password, role });
+    } else {
+      result = await api.auth.login({ email, password });
+    }
+
+    // result.user has { id, name, email, role }
+    onLogin(result.user);
+  } catch (err: any) {
+    alert(err.message || 'Authentication failed');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 flex items-center justify-center p-4">
