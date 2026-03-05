@@ -39,3 +39,18 @@ prime-backend/
 │   └── errorHandler.js
 └── scripts/
     └── seedAdmin.js
+
+Running the App
+
+Step 1 — Start the backend
+    bashcd prime-backend
+    npm run dev
+    # → MongoDB connected
+    # → Server running on http://localhost:5000
+Step 2 — Start the frontend
+    bashcd your-react-project
+    npm run dev
+    # → http://localhost:5173
+Step 3 — Seed the admin
+    bashcd prime-backend
+    node scripts/seedAdmin.js 
