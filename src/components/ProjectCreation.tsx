@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { X, Plus, Trash2, ArrowLeft } from 'lucide-react';
-import { User, Project, TeamMember, ViewType, AccessRequest } from '../App';
+import { User, Project, TeamMember, ViewType, AccessRequest, UploadedFile } from '../App';
 import { Sidebar } from './Sidebar';
 import { NotificationPanel } from './NotificationPanel';
+import { FileUploadSection } from './FileUploadSection';
 
 interface ProjectCreationProps {
   user: User;
@@ -35,6 +36,7 @@ export function ProjectCreation({
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
     { name: user.name, email: user.email, contribution: 'Project Lead' }
   ]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   
   const [domainInput, setDomainInput] = useState('');
   const [techInput, setTechInput] = useState('');
@@ -89,6 +91,7 @@ export function ProjectCreation({
       teamMembers,
       createdAt: new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
+      uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
     };
 
     onCreateProject(newProject);
@@ -335,6 +338,12 @@ export function ProjectCreation({
                 Add Team Member
               </button>
             </div>
+
+            {/* File Upload */}
+            <FileUploadSection 
+              uploadedFiles={uploadedFiles}
+              onFilesChange={setUploadedFiles}
+            />
 
             {/* Submit Button */}
             <div className="flex gap-4 pt-6">
