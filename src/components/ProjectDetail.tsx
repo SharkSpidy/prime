@@ -2,14 +2,19 @@ import { useState } from 'react';
 import { ArrowLeft, Lock, Send, Clock, FileText, MessageSquare, Folder } from 'lucide-react';
 import { User, Project, AccessRequest, ViewType } from '../App';
 import { Sidebar } from './Sidebar';
+import { RepositoryView } from './RepositoryView';
+import { NotificationPanel } from './NotificationPanel';
 
 interface ProjectDetailProps {
   user: User;
   project: Project;
+  projects: Project[];
   accessRequests: AccessRequest[];
   onNavigate: (view: ViewType) => void;
   onLogout: () => void;
   onRequestAccess: (projectId: string) => void;
+  onApproveRequest: (requestId: string) => void;
+  onRejectRequest: (requestId: string) => void;
 }
 
 type TabType = 'overview' | 'repository' | 'timeline' | 'discussion';
@@ -17,13 +22,17 @@ type TabType = 'overview' | 'repository' | 'timeline' | 'discussion';
 export function ProjectDetail({
   user,
   project,
+  projects,
   accessRequests,
   onNavigate,
   onLogout,
   onRequestAccess,
+  onApproveRequest,
+  onRejectRequest,
 }: ProjectDetailProps) {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [message, setMessage] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Check if faculty has access
   const hasAccess = 
@@ -35,6 +44,14 @@ export function ProjectDetail({
   const hasPendingRequest = accessRequests.some(
     req => req.projectId === project.id && req.facultyId === user.id && req.status === 'pending'
   );
+
+  // Calculate notification count
+  const notificationCount = user.role === 'student'
+    ? accessRequests.filter(req => {
+        const proj = projects.find(p => p.id === req.projectId);
+        return proj && proj.ownerId === user.id && req.status === 'pending';
+      }).length
+    : accessRequests.filter(req => req.facultyId === user.id && req.status === 'pending').length;
 
   const tabs = [
     { id: 'overview' as TabType, label: 'Overview', icon: FileText },
@@ -88,9 +105,10 @@ export function ProjectDetail({
       <Sidebar
         user={user}
         currentView="dashboard"
-        notificationCount={0}
+        notificationCount={notificationCount}
         onNavigate={onNavigate}
         onLogout={onLogout}
+        onNotificationClick={() => setShowNotifications(!showNotifications)}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -249,11 +267,12 @@ export function ProjectDetail({
               )}
 
               {activeTab === 'repository' && (
-                <div className="max-w-4xl mx-auto">
-                  <div className="bg-white rounded-xl border border-slate-200 p-6">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4">Project Files</h3>
-                    <FileTree files={mockFiles} />
-                  </div>
+                <div className="max-w-7xl mx-auto">
+                  <RepositoryView 
+                    projectTitle={project.title} 
+                    owner={project.owner}
+                    uploadedFiles={project.uploadedFiles}
+                  />
                 </div>
               )}
 
@@ -333,32 +352,18 @@ export function ProjectDetail({
           )}
         </div>
       </div>
-    </div>
-  );
-}
 
-// File Tree Component
-function FileTree({ files, depth = 0 }: { files: any[]; depth?: number }) {
-  return (
-    <div className="space-y-1">
-      {files.map((file, index) => (
-        <div key={index}>
-          <div
-            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded cursor-pointer"
-            style={{ paddingLeft: `${depth * 20 + 12}px` }}
-          >
-            {file.type === 'folder' ? (
-              <Folder className="w-4 h-4 text-indigo-600" />
-            ) : (
-              <FileText className="w-4 h-4 text-slate-400" />
-            )}
-            <span className="text-sm text-slate-700 font-medium">{file.name}</span>
-          </div>
-          {file.children && file.children.length > 0 && (
-            <FileTree files={file.children} depth={depth + 1} />
-          )}
-        </div>
-      ))}
+      {/* Notification Panel */}
+      {showNotifications && (
+        <NotificationPanel
+          user={user}
+          accessRequests={accessRequests}
+          projects={projects}
+          onApprove={onApproveRequest}
+          onReject={onRejectRequest}
+          onClose={() => setShowNotifications(false)}
+        />
+      )}
     </div>
   );
 }
